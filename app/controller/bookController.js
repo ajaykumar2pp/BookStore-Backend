@@ -25,7 +25,7 @@ const handleMultipartData = multer({
 
 function bookController() {
   return {
-   
+
 
     // ****************************  Book Create ******************************//
 
@@ -37,7 +37,7 @@ function bookController() {
             return resp.status(500).json({ error: 'Internal server error' });
           }
 
-          const { bookTitle, authorName, price ,content, author_id } = req.body;
+          const { bookTitle, authorName, price, content, author_id } = req.body;
           // const imagePath = req.file ? req.file.path : null;
           console.log(req.body)
 
@@ -52,7 +52,16 @@ function bookController() {
             return resp.status(400).json({ error: 'All required fields are mandatory' });
           }
 
-          
+          // Check if the user with the specified author_id exists
+          const user = await User.findById(author_id);
+          if (!user) {
+            // If the user is not found, delete the uploaded image
+            if (req.file) {
+              fs.unlinkSync(req.file.path);
+            }
+            return resp.status(404).json({ error: 'User not found' });
+          }
+
           const imageURL = `http://${req.headers.host}/${filePath.replace(/\\/g, '/')}`;
           // const imageURL = `${process.env.APP_URL}/${filePath.replace(/\\/g, '/')}`;
           console.log(req.file)
@@ -66,17 +75,14 @@ function bookController() {
             price,
             image: imageURL,
           });
-          // Find user by id
-          const user = await User.findById(author_id);
 
-          // If the user is found, add the book reference to the user
-          if (!user) {
-            user.books.push(createBook);
-            await user.save();
-          }
+          // Add the book reference to the user
+          user.books.push(createBook);
+          await user.save();
 
+      
           console.log(createBook)
-          resp.status(201).json({ data: { book: createBook} })
+          resp.status(201).json({ data: { book: createBook } })
         })
       } catch (err) {
         console.error(err);
@@ -109,7 +115,7 @@ function bookController() {
             return resp.status(500).json({ error: 'Internal server error' });
           }
 
-          const {bookTitle,authorName,price } = req.body;
+          const { bookTitle, authorName, price } = req.body;
           console.log(req.body)
 
 
@@ -136,7 +142,7 @@ function bookController() {
 
 
 
-        
+
           // If a new image is uploaded, delete the previous image
           if (req.file && existingBook.image) {
             try {
@@ -211,15 +217,23 @@ function bookController() {
         const imagePath = imageUrl.replace("http://localhost:8500/", '');
         console.log(imagePath)
 
-        fs.unlink(imagePath, (err) => {
-          if (err) {
-            // console.error(err);
-            return resp.status(500).json({ error: "Image Not Deleted" });
-          }
+        await fs.promises.unlink(imagePath);
 
-          return resp.status(200).json({ data: { message: "Book deleted successfully" } });
-        });
+        // Find the author and remove the book reference
+        const authorId = deleteBook._doc.author_id;
+        const author = await User.findById(authorId);
+
+        if (author) {
+          author.books.pull(bookId); // Remove the book reference
+          await author.save();
+        } else {
+          console.error(`Author with id ${authorId} not found.`);
+        }
+
+        return resp.status(200).json({ data: { message: "Book deleted successfully" } });
+
       } catch {
+        console.error(err);
         resp.status(500).json({ error: "Failed to delete book" });
       }
     },
@@ -262,22 +276,22 @@ function bookController() {
     //****************** All Book Find By Author_id  *********************** *//
     async findBooksByAuthorId(req, resp) {
       try {
-        const { author_id } = req.params; 
+        const { author_id } = req.params;
         // console.log(author_id)
-    
+
         // Valid author_id is a valid ObjectId 
         if (!mongoose.Types.ObjectId.isValid(author_id)) {
           return resp.status(400).json({ error: 'Invalid author_id' });
         }
-    
+
         const books = await Book.find({ author_id })
           .select("-updatedAt -createdAt -__v")
           .sort({ _id: -1 });
-    
+
         if (books.length > 0) {
           return resp.json({ data: { books } });
         }
-    
+
         resp.json({ data: { message: "No books found for the specified author_id" } });
       } catch (err) {
         console.error(err);
