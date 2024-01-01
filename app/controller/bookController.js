@@ -47,7 +47,11 @@ function bookController() {
           if (!bookTitle || !authorName || !price || !content || !author_id) {
             // If any required field is missing in the request, delete the uploaded image
             if (req.file) {
-              fs.unlinkSync(req.file.path);
+              try {
+                fs.unlinkSync(req.file.path);
+              } catch (unlinkError) {
+                console.error(unlinkError);
+              }
             }
             return resp.status(400).json({ error: 'All required fields are mandatory' });
           }
@@ -57,7 +61,11 @@ function bookController() {
           if (!user) {
             // If the user is not found, delete the uploaded image
             if (req.file) {
-              fs.unlinkSync(req.file.path);
+              try {
+                fs.unlinkSync(req.file.path);
+              } catch (unlinkError) {
+                console.error(unlinkError);
+              }
             }
             return resp.status(404).json({ error: 'User not found' });
           }
@@ -80,7 +88,7 @@ function bookController() {
           user.books.push(createBook);
           await user.save();
 
-      
+
           console.log(createBook)
           resp.status(201).json({ data: { book: createBook } })
         })
@@ -115,7 +123,7 @@ function bookController() {
             return resp.status(500).json({ error: 'Internal server error' });
           }
 
-          const { bookTitle, authorName, price } = req.body;
+          const { bookTitle,content, authorName, price } = req.body;
           console.log(req.body)
 
 
@@ -127,10 +135,9 @@ function bookController() {
           }
 
 
-          // const filePath = req.file.path;
           const imageURL = `http://${req.headers.host}/${filePath}`;
           // const imageURL = `http://${req.headers.host}/${filePath.replace(/\\/g, '/')}`;
-          console.log(req.file)
+          // console.log(req.file)
           console.log(filePath)
 
           const existingBook = await Book.findById(req.params.id);
@@ -150,12 +157,13 @@ function bookController() {
               // Extract the path from the URL
               const imagePath = imageUrl.replace(`http://${req.headers.host}/`, '');
 
-              fs.unlink(imagePath, (err) => {
-                if (err) {
-                  console.error(err);
-                  return resp.status(500).json({ error: "Image Not Deleted" });
-                }
-              });
+              await fs.promises.unlink(imagePath);
+              // fs.unlink(imagePath, (err) => {
+              //   if (err) {
+              //     console.error(err);
+              //     return resp.status(500).json({ error: "Image Not Deleted" });
+              //   }
+              // });
             } catch (err) {
               console.error(err);
               return resp.status(500).json({ error: "Failed to delete previous image" });
@@ -167,11 +175,8 @@ function bookController() {
           if (imageURL) {
             image = imageURL;
           } else {
-
             image = existingBook.image;
           }
-
-
 
           const updateBook = await Book.findByIdAndUpdate(
             { _id: req.params.id },
@@ -292,10 +297,10 @@ function bookController() {
           return resp.json({ data: { books } });
         }
 
-        resp.json({ data: { message: "No books found for the specified author_id" } });
+        return resp.json({ data: { message: "No books found for the specified author_id" } });
       } catch (err) {
         console.error(err);
-        resp.status(500).json({ error: "Failed to fetch books" });
+        return  resp.status(500).json({ error: "Failed to fetch books" });
       }
     }
   };

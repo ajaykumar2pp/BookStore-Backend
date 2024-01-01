@@ -7,11 +7,19 @@ const bookSchema = new Schema(
         bookTitle: { type: String, required: true },
         authorName: { type: String, required: true },
         author_id: {
-             type:mongoose.Schema.Types.ObjectId, ref: 'Author',},
+            type: mongoose.Schema.Types.ObjectId,
+             ref: 'Author'
+        },
         // pages: { type: Number, required: true },
         // isbn: { type: String, required: true },
         content: { type: String, required: true },
         price: { type: Number, required: true },
+        reviews:[
+            {
+                type:mongoose.Schema.Types.ObjectId,
+                ref: 'Review'
+            }
+        ],
         image: {
             type: String, required: true,
             get: function (image) {
