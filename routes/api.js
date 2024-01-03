@@ -22,7 +22,7 @@ function initRoutes(app) {
   app.delete("/books/:id", bookController().delete);
 
   // Search Books in API 
-  app.get("/search/:key", bookController().search);
+  app.get("/search/:key", bookController().search);  //Book Search by Book Name and Author Name
 
   // Book Search by Author Id  API 
   app.get("/books/author/:author_id", bookController().findBooksByAuthorId);

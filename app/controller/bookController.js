@@ -262,11 +262,11 @@ function bookController() {
     //******************  Search Book  *********************** */
     async search(req, resp) {
       try {
-        let bookId = req.params.key;
+        let searchKey = req.params.key;
         let searchBook = await Book.find({
           "$or": [
-            { name: { $regex: bookId } },
-            { company: { $regex: bookId } },
+            { bookTitle: { $regex: searchKey , $options: 'i'} },
+            { authorName: { $regex: searchKey, $options: 'i' } },
           ],
         }).select("-updatedAt -createdAt -_v");
         if (searchBook.length === 0) {
@@ -274,6 +274,7 @@ function bookController() {
         }
         resp.json(searchBook);
       } catch (err) {
+         console.error('Error searching for books:', err);
         resp.status(500).json({ error: "Failed to search book" });
       }
     },

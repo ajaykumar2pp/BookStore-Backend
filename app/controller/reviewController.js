@@ -63,7 +63,7 @@ function reviewController() {
                     return resp.status(404).json({ error: 'Book not found' });
                 }
                 
-                const reviews = await Review.find({bookId}).select('username date rating comments').sort({ date: -1 });
+                const reviews = await Review.find({bookId}).select('username date rating comment').sort({ date: -1 });
 
                 resp.status(200).json({ data: { reviews } });
             } catch (error) {
