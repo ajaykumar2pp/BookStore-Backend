@@ -235,7 +235,7 @@ function bookController() {
           console.error(`Author with id ${authorId} not found.`);
         }
 
-        return resp.status(200).json({ data: { message: "Book deleted successfully" } });
+        return resp.status(204).json({ data: { message: "Book deleted successfully" } });
 
       } catch {
         console.error(err);
