@@ -41,10 +41,31 @@ function reviewController() {
         //*************************  Delete  Review Book *************** */
         async deleteReview(req, resp) {
             try {
-                const reviewId = req.params.id;
+                const reviewId = req.params.reviewId;
                 console.log(reviewId)
+
+                const existingReview = await Review.findById(reviewId);
+
+                if (!existingReview) {
+                    return resp.status(404).json({ message: 'Review not found' });
+                }
+
+                const deleteReview = await Review.findByIdAndDelete(reviewId);
+                if (!deleteReview) {
+                    return resp.status(404).json({ message: 'Review not found' });
+                }
+
+                console.log('Review deleted:', deleteReview);
+
+                resp.status(200).json({
+                    data: {
+                        message: "Review deleted successfully",
+                        deletedReview: deleteReview
+                    }
+                });
+
             } catch (error) {
-                console.error(error);
+                console.error('Error deleting review:', error);
                 resp.status(500).json({ error: 'Failed to delete review' });
             }
         },
@@ -53,7 +74,7 @@ function reviewController() {
         async getReviewsByBook(req, resp) {
             try {
                 const bookId = req.params.id;
-                
+
 
                 // Find the book by ID
                 const book = await Book.findById(bookId);
@@ -62,8 +83,8 @@ function reviewController() {
                 if (!book) {
                     return resp.status(404).json({ error: 'Book not found' });
                 }
-                
-                const reviews = await Review.find({bookId}).select('username date rating comment').sort({ date: -1 });
+
+                const reviews = await Review.find({ bookId }).select('username date rating comment').sort({ date: -1 });
 
                 resp.status(200).json({ data: { reviews } });
             } catch (error) {
