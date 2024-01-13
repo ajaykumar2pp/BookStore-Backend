@@ -24,13 +24,13 @@ function authController() {
         const userId = req.params.id;
         console.log(userId)
 
-        const User = await User.findOne({ _id: userId }, { password: 0 });
+        const user = await User.findOne({ _id: userId }, { password: 0 });
 
-        if (!User) {
+        if (!user) {
           return resp.status(404).json({ message: 'User not found' });
         }
 
-        return resp.status(200).json(User);
+        return resp.status(200).json(user);
       } catch (error) {
         console.error(error);
         resp.status(500).json({ error: "Internal server error" });
@@ -40,16 +40,24 @@ function authController() {
 
     async updateUser(req, resp) {
       try {
-        const id = req.params.id;
+        const userId = req.params.id;
         const updatedUserData = req.body;
 
-        const updateUser = await User.updateOne(
-          { _id: id },
+        // Check if the user exists
+        const existingUser = await User.findById(userId);
+        if (!existingUser) {
+          return resp.status(404).json({ message: 'User not found' });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+          userId, 
+          updatedUserData,
           {
-            $set: updatedUserData,
+            new: true,
           }
-        );
-        return resp.status(200).json(updateUser);
+          );
+
+        return resp.status(200).json(updatedUser);
       } catch (error) {
         console.error(error);
         resp.status(500).json({ error: "Internal server error" });
@@ -63,7 +71,7 @@ function authController() {
 
         const deleteUser = await User.deleteOne({ _id: userId });
 
-        if (!deleteUser) {
+        if (deleteUser.deletedCount === 0) {
           return resp.status(404).json({ message: 'User not found' });
         }
 
