@@ -12,7 +12,11 @@ const userSchema = new Schema(
                 ref: 'Book'
             }
         ],
-        date:{ type:String, default:Date.now }
+        date:{ type:String, default:Date.now },
+        isAdmin:{
+            type:Boolean,
+            default:false
+        }
        
     },
     { timestamps: true });

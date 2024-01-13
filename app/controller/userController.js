@@ -73,7 +73,7 @@ function userController() {
       }
 
       // Create and sign a JWT token
-      const token = jwt.sign({ _id: userLogin._id, username: userLogin.username , email: userLogin.email}, process.env.SECRET_KEY, {
+      const token = jwt.sign({ _id: userLogin._id, username: userLogin.username , email: userLogin.email, isAdmin:userLogin.isAdmin}, process.env.SECRET_KEY, {
         expiresIn: '365d',  // it will be expired after 365 days
         // expiresIn: "24h",  // it will be expired after 24 hours
         // expiresIn: "120", // it will be expired after 120ms
@@ -89,12 +89,16 @@ function userController() {
             _id: userLogin._id,
             username: userLogin.username,
             email:email
+            // isAdmin:userLogin.isAdmin
 
           }
         }
 
       });
     },
+
+
+    
   };
 }
 module.exports = userController;

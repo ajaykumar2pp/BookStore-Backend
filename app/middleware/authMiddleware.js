@@ -11,6 +11,7 @@ module.exports = (req, res, next) => {
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized - Token missing' });
     }
+    
     const bearerToken = token.split(' ')[1];
     // Verify the JWT token  { ignoreExpiration: true }, Bearer
     jwt.verify(bearerToken, process.env.SECRET_KEY, (err, user) => {
