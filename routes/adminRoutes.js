@@ -4,17 +4,22 @@ const adminMiddleware = require("../app/middleware/adminMiddleware");
 
 
 function initRoutes(app) {
-  //*********************************   Admin Route routes  **************************** *//
+  //*******************   Admin Route routes  **************************** *//
 
-    //  GET   http://localhost:8500/users
-    app.get("/users", authMiddleware,adminMiddleware, adminController().getAllUser); // Get All User
+  //  GET   http://localhost:8500/users
+  app.get("/users", authMiddleware, adminMiddleware, adminController().getAllUser); // Get All User
 
- //  GET   http://localhost:8500/user
- app.get("/users/:id", authMiddleware,adminMiddleware, adminController().getSingleUser); // Get Single User
+  //  GET   http://localhost:8500/user/:id
+  app.get("/users/:id", authMiddleware, adminMiddleware, adminController().getSingleUser); // Get Single User
 
- //  DELETE   http://localhost:8500/users/:id 
- app.delete("/users/:id", authMiddleware,adminMiddleware, adminController().deleteUser); // Delete User
+ //  PUT   http://localhost:8500/update-user/:id
+ app.put("/update-users/:id", authMiddleware, adminMiddleware, adminController().updateUser); // Update User
 
 
+  //  DELETE   http://localhost:8500/users/:id 
+  app.delete("/users/:id", authMiddleware, adminMiddleware, adminController().deleteUser); // Delete User
+
+// POST http://localhost:8500/users/:id/block
+app.post("http://localhost:8500/users/:id/block",authMiddleware,adminMiddleware,adminController().blockUser)
 }
 module.exports = initRoutes;

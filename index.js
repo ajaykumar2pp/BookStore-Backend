@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const bodyParser = require('body-parser')
-const helmet = require('helmet');
 const { connectMonggose } = require('./app/database/db')
 const userRoutes = require('./routes/userRoutes');
 const bookRoutes = require('./routes/bookRoutes');
@@ -11,13 +10,14 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
-
+// ******************  Enable CORS  ********************//
+app.use(cors());
 
 // ************************  Database Connection  **********************************//
 connectMonggose();
 
 // ****************    Security Headers   ****************************//
-app.use(helmet());
+// app.use(helmet());
 
 // *************************    Assets    ****************************************//
 const publicPath = path.join(__dirname, "public");
@@ -27,7 +27,7 @@ app.use("/uploads", express.static("uploads"))
 // *************   Body parsing middleware  ************************//
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
-app.use(cors());
+
 
 // *********************************** API Routes ********************************//
 adminRoutes(app);

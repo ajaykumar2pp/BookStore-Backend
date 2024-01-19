@@ -22,7 +22,7 @@ function authController() {
     async getSingleUser(req, resp) {
       try {
         const userId = req.params.id;
-        console.log(userId)
+        // console.log(userId)
 
         const user = await User.findOne({ _id: userId }, { password: 0 });
 
@@ -41,7 +41,10 @@ function authController() {
     async updateUser(req, resp) {
       try {
         const userId = req.params.id;
-        const updatedUserData = req.body;
+        console.log(userId)
+        // const updatedUserData = req.body;
+        const { name, email, admin } = req.body;
+        console.log(req.body)
 
         // Check if the user exists
         const existingUser = await User.findById(userId);
@@ -49,15 +52,22 @@ function authController() {
           return resp.status(404).json({ message: 'User not found' });
         }
 
-        const updatedUser = await User.findByIdAndUpdate(
-          userId, 
-          updatedUserData,
+        const updatedUser = await User.findOneAndUpdate(
+          { _id: userId },
           {
-            new: true,
-          }
-          );
+            username: name,
+            email,
+            isAdmin: admin
+          },
+          { new: true }
+        ).select('-updatedAt -createdAt -__v');
 
+        if (!updatedUser) {
+          return resp.status(500).json({ error: 'Failed to update user' });
+        }
+        console.log(updatedUser)
         return resp.status(200).json(updatedUser);
+
       } catch (error) {
         console.error(error);
         resp.status(500).json({ error: "Internal server error" });
@@ -98,6 +108,24 @@ function authController() {
       } catch (error) {
         console.error(error);
         resp.status(500).json({ error: "No User Found" });
+      }
+    },
+
+    async blockUser(req, resp) {
+      const { id } = req.params;
+      try {
+        const user = await User.findById(id);
+
+        if (!user) {
+          return resp.status(404).json({ message: 'User not found' });
+        }
+        user.isBlocked = true;
+        await user.save();
+
+        resp.status(200).json({ message: 'User blocked successfully', user });
+      } catch (error) {
+        console.error('Error blocking user:', error.message);
+        resp.status(500).json({ message: 'Internal server error' });
       }
     }
   }
