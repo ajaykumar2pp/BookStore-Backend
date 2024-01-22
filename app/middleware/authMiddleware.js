@@ -3,11 +3,12 @@ const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
 
-  try {
+  
     // Check if the "Authorization" header is present in the request
     // const token = req.headers['authorization'];
     const token = req.header('Authorization');
     // Check if the token is missing
+
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized - Token missing' });
     }
@@ -21,15 +22,10 @@ module.exports = (req, res, next) => {
 
       // Attach the authenticated user data to the request object
       req.user = user;
-
+      console.log(req.user)
 
       // Continue to the next middleware or route handler
       next();
     });
-  }
-  catch (error) {
-    console.error('Error verifying token:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-
+  
 };

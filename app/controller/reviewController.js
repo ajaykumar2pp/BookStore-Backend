@@ -11,7 +11,7 @@ function reviewController() {
         async postReview(req, resp) {
             try {
                 const { username, email, rating, comment, bookId } = req.body;
-                console.log(req.body)
+                // console.log(req.body)
                 if (!username || !email || !rating || !comment || !bookId) {
                     return resp.status(400).json({ error: 'All fields are mandatory' });
                 }
@@ -42,7 +42,7 @@ function reviewController() {
         async deleteReview(req, resp) {
             try {
                 const reviewId = req.params.reviewId;
-                console.log(reviewId)
+                // console.log(reviewId)
 
                 const existingReview = await Review.findById(reviewId);
 
@@ -55,7 +55,7 @@ function reviewController() {
                     return resp.status(404).json({ message: 'Review not found' });
                 }
 
-                console.log('Review deleted:', deleteReview);
+                // console.log('Review deleted:', deleteReview);
 
                 resp.status(200).json({
                     data: {

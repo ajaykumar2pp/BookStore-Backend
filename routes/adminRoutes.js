@@ -12,14 +12,14 @@ function initRoutes(app) {
   //  GET   http://localhost:8500/user/:id
   app.get("/users/:id", authMiddleware, adminMiddleware, adminController().getSingleUser); // Get Single User
 
- //  PUT   http://localhost:8500/update-user/:id
- app.put("/update-users/:id", authMiddleware, adminMiddleware, adminController().updateUser); // Update User
+  //  PUT   http://localhost:8500/update-user/:id
+  app.put("/update-users/:id", authMiddleware, adminMiddleware, adminController().updateUser); // Update User
 
 
   //  DELETE   http://localhost:8500/users/:id 
   app.delete("/users/:id", authMiddleware, adminMiddleware, adminController().deleteUser); // Delete User
 
-// POST http://localhost:8500/users/:id/block
-app.post("http://localhost:8500/users/:id/block",authMiddleware,adminMiddleware,adminController().blockUser)
+  // POST http://localhost:8500/users/:id/block
+  app.post("/users/:id/block",   adminController().blockUser)  // Block User
 }
 module.exports = initRoutes;

@@ -49,7 +49,7 @@ function userController() {
 
     async loginUser(req, resp) {
       const { email, password } = req.body;
-      console.log(req.body)
+      // console.log(req.body)
 
       // Validate input data
       if (!email || !password) {
@@ -58,13 +58,13 @@ function userController() {
 
       // Check if a user with the provided name exists
       const userLogin = await User.findOne({ email });
-      console.log(userLogin)
+      // console.log(userLogin)
 
       if (!userLogin) {
         return resp.status(404).json({ message: 'User not found' });
       }
 
-      
+
       // Compare the provided password with the stored hashed password
       const passwordMatch = await bcrypt.compare(password, userLogin.password);
 
@@ -73,12 +73,15 @@ function userController() {
       }
 
       // Create and sign a JWT token
-      const token = jwt.sign({ _id: userLogin._id, username: userLogin.username , email: userLogin.email, isAdmin:userLogin.isAdmin}, process.env.SECRET_KEY, {
+      const token = jwt.sign({ _id: userLogin._id, username: userLogin.username, email: userLogin.email, isAdmin: userLogin.isAdmin, isBlocked: userLogin.isBlocked },
+         process.env.SECRET_KEY, {
         expiresIn: '365d',  // it will be expired after 365 days
         // expiresIn: "24h",  // it will be expired after 24 hours
         // expiresIn: "120", // it will be expired after 120ms
         // expiresIn: "120s" // it will be expired after 120s
       });
+
+      // console.log(token)
 
       // resp.status(201).json({ data: { user: userWithoutPassword } });
       return resp.status(200).json({
@@ -88,7 +91,7 @@ function userController() {
             token,
             _id: userLogin._id,
             username: userLogin.username,
-            email:email
+            email: email
             // isAdmin:userLogin.isAdmin
 
           }
@@ -98,7 +101,7 @@ function userController() {
     },
 
 
-    
+
   };
 }
 module.exports = userController;
