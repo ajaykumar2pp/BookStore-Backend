@@ -1,6 +1,6 @@
-const authMiddleware = require("../app/middleware/authMiddleware")
-const adminController = require("../app/controller/adminController");
-const adminMiddleware = require("../app/middleware/adminMiddleware");
+const authMiddleware =  require("./../middleware/authMiddleware");
+const adminController = require("./../controller/adminController");
+const adminMiddleware = require("./../middleware/adminMiddleware");
 
 
 function initRoutes(app) {

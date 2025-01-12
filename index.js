@@ -3,11 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const bodyParser = require('body-parser')
-const { connectMonggose } = require('./app/database/db')
-const userRoutes = require('./routes/userRoutes');
-const bookRoutes = require('./routes/bookRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
-const adminRoutes = require('./routes/adminRoutes');
+const { connectMonggose } = require('./src/config/db'); 
+const userRoutes = require('./src/routes/userRoutes');  
+const bookRoutes = require('./src/routes/bookRoutes');  
+const reviewRoutes = require('./src/routes/reviewRoutes');  
+const adminRoutes = require('./src/routes/adminRoutes');
 
 const app = express();
 // ******************  Enable CORS  ********************//

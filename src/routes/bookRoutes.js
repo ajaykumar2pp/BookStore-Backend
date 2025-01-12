@@ -1,5 +1,5 @@
-const bookController = require("../app/controller/bookController");
-const authMiddleware = require("../app/middleware/authMiddleware")
+const bookController = require("./../controller/bookController");
+const authMiddleware = require("./../middleware/authMiddleware");
 
 function initRoutes(app) {
     //********************************* Author Book API routes  **************************** *//

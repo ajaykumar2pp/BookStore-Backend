@@ -1,5 +1,5 @@
-const reviewController = require("../app/controller/reviewController");
-const authMiddleware = require("../app/middleware/authMiddleware")
+const reviewController = require("./../controller/reviewController");
+const authMiddleware = require("./../middleware/authMiddleware");
 
 function initRoutes(app) {
     //*********************************  User Reviews API routes  **************************** *//
