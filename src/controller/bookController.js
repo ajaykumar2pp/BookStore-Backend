@@ -76,7 +76,7 @@ function bookController() {
               }
 
               // Delete the uploaded file from the server
-              await fs.unlink(uploadedFile.path);
+              await unlink(uploadedFile.path);
 
               return resp.status(201).json({ book: createBook });
             } catch (uploadError) {
