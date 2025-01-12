@@ -1,5 +1,6 @@
 require('dotenv').config()
 const mongoose = require('mongoose');
+const cloudinary = require('../config/cloudinary');
 const multer = require("multer")
 const path = require("path")
 const fs = require('fs')
@@ -31,70 +32,53 @@ function bookController() {
 
     async create(req, resp) {
       try {
-        handleMultipartData(req, resp, async (err) => {
-          if (err) {
-            console.error(err);
-            return resp.status(500).json({ error: 'Internal server error' });
-          }
-
-          const { bookTitle, authorName, price, content, author_id } = req.body;
-          // const imagePath = req.file ? req.file.path : null;
-          console.log(req.body)
-
-
-          const filePath = req.file.path;
-
-          if (!bookTitle || !authorName || !price || !content || !author_id) {
-            // If any required field is missing in the request, delete the uploaded image
-            if (req.file) {
-              try {
-                fs.unlinkSync(req.file.path);
-              } catch (unlinkError) {
-                console.error(unlinkError);
-              }
+        handleMultipartData(
+          req, resp, async (err) => {
+            if (err) {
+              console.error(err);
+              return resp.status(500).json({ error: 'Internal server error' });
             }
-            return resp.status(400).json({ error: 'All required fields are mandatory' });
-          }
 
-          // Check if the user with the specified author_id exists
-          const user = await User.findById(author_id);
-          if (!user) {
-            // If the user is not found, delete the uploaded image
-            if (req.file) {
-              try {
-                fs.unlinkSync(req.file.path);
-              } catch (unlinkError) {
-                console.error(unlinkError);
-              }
+            const { bookTitle, authorName, price, content, author_id } = req.body;
+            const uploadedFile = req.file;
+            console.log(req.body)
+
+
+            if (!bookTitle || !authorName || !price || !content || !author_id || !uploadedFile) {
+              return resp.status(400).json({ error: 'All required fields, including a file, are mandatory' });
             }
-            return resp.status(404).json({ error: 'User not found' });
-          }
 
-          const imageURL = `http://${req.headers.host}/${filePath.replace(/\\/g, '/')}`;
-          // const imageURL = `${process.env.APP_URL}/${filePath.replace(/\\/g, '/')}`;
-          console.log(req.file)
-          console.log(filePath)
+            try {
+              // Upload file to Cloudinary
+              const result = await cloudinary.uploader.upload(uploadedFile.path, {
+                folder: 'books',
+              });
 
-          const createBook = await Book.create({
-            bookTitle,
-            authorName,
-            content,
-            author_id,
-            price,
-            image: imageURL,
-          });
+              const createBook = await Book.create({
+                bookTitle,
+                authorName,
+                content,
+                author_id,
+                price,
+                image: result.secure_url,
+              });
 
-          // Add the book reference to the user
-          user.books.push(createBook);
-          await user.save();
+              const user = await User.findById(author_id);
+              if (user) {
+                user.books.push(createBook);
+                await user.save();
+              }
 
+              resp.status(201).json({ data: { book: createBook } });
+            } catch (uploadError) {
+              console.error('Upload error:', uploadError);
+              return resp.status(500).json({ error: 'Failed to upload image or save book' });
+            }
 
-          console.log(createBook)
-          resp.status(201).json({ data: { book: createBook } })
-        })
+          })
       } catch (err) {
         console.error(err);
-        resp.status(500).json({ error: 'Failed to save book' });
+        resp.status(500).json({ error: 'Unexpected error occurred' });
       }
     },
 
@@ -123,7 +107,7 @@ function bookController() {
             return resp.status(500).json({ error: 'Internal server error' });
           }
 
-          const { bookTitle,content, authorName, price } = req.body;
+          const { bookTitle, content, authorName, price } = req.body;
           console.log(req.body)
 
 
@@ -265,7 +249,7 @@ function bookController() {
         let searchKey = req.params.key;
         let searchBook = await Book.find({
           "$or": [
-            { bookTitle: { $regex: searchKey , $options: 'i'} },
+            { bookTitle: { $regex: searchKey, $options: 'i' } },
             { authorName: { $regex: searchKey, $options: 'i' } },
           ],
         }).select("-updatedAt -createdAt -_v");
@@ -274,7 +258,7 @@ function bookController() {
         }
         resp.json(searchBook);
       } catch (err) {
-         console.error('Error searching for books:', err);
+        console.error('Error searching for books:', err);
         resp.status(500).json({ error: "Failed to search book" });
       }
     },
@@ -301,7 +285,7 @@ function bookController() {
         return resp.json({ data: { message: "No books found for the specified author_id" } });
       } catch (err) {
         console.error(err);
-        return  resp.status(500).json({ error: "Failed to fetch books" });
+        return resp.status(500).json({ error: "Failed to fetch books" });
       }
     }
   };

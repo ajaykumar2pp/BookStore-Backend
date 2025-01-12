@@ -13,7 +13,7 @@ const bookSchema = new Schema(
         // pages: { type: Number, required: true },
         // isbn: { type: String, required: true },
         content: { type: String, required: true },
-        price: { type: Number, required: true },
+        price: { type: Number, required: true, min:0 },
         reviews:[
             {
                 type:mongoose.Schema.Types.ObjectId,
@@ -22,15 +22,9 @@ const bookSchema = new Schema(
         ],
         image: {
             type: String, required: true,
-            get: function (image) {
-                if (process.env.ON_RENDER === 'true') {
-                    return image;
-                }
-                return `${image}`
-            }
         }
 
     },
-    { timestamps: true, toJSON: { getters: true }, id: false }
+    { timestamps: true}
 );
 module.exports = mongoose.model('Book', bookSchema);

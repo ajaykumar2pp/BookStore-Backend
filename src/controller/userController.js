@@ -91,8 +91,8 @@ function userController() {
             token,
             _id: userLogin._id,
             username: userLogin.username,
-            email: email
-            // isAdmin:userLogin.isAdmin
+            email: email,
+            isAdmin:userLogin.isAdmin
 
           }
         }
