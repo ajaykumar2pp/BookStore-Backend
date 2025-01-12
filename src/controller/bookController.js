@@ -4,6 +4,7 @@ const cloudinary = require('../config/cloudinary');
 const multer = require("multer")
 const path = require("path")
 const fs = require('fs')
+const { unlink } = require('fs/promises')
 const Book = require("../model/bookModel");
 const User = require('../model/userModel')
 
@@ -41,35 +42,43 @@ function bookController() {
 
             const { bookTitle, authorName, price, content, author_id } = req.body;
             const uploadedFile = req.file;
-            console.log(req.body)
+            // console.log(req.body)
 
 
             if (!bookTitle || !authorName || !price || !content || !author_id || !uploadedFile) {
               return resp.status(400).json({ error: 'All required fields, including a file, are mandatory' });
             }
 
+
             try {
+
               // Upload file to Cloudinary
-              const result = await cloudinary.uploader.upload(uploadedFile.path, {
+              const uploadResult = await cloudinary.uploader.upload(uploadedFile.path, {
                 folder: 'books',
               });
 
-              const createBook = await Book.create({
+              const createBookPromise = Book.create({
                 bookTitle,
                 authorName,
                 content,
                 author_id,
                 price,
-                image: result.secure_url,
+                image: uploadResult.secure_url,
               });
 
-              const user = await User.findById(author_id);
+              const findUserPromise = User.findById(author_id);
+
+              const [createBook, user] = await Promise.all([createBookPromise, findUserPromise]);
+
               if (user) {
-                user.books.push(createBook);
+                user.books.push(createBook._id);
                 await user.save();
               }
 
-              resp.status(201).json({ data: { book: createBook } });
+              // Delete the uploaded file from the server
+              await fs.unlink(uploadedFile.path);
+
+              return resp.status(201).json({ book: createBook });
             } catch (uploadError) {
               console.error('Upload error:', uploadError);
               return resp.status(500).json({ error: 'Failed to upload image or save book' });
